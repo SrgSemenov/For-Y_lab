@@ -1,6 +1,15 @@
-import random
 from termcolor import colored
+import random
 import time
+
+
+def change_color(symbol):
+    """Функция меняет цвет символа"""
+
+    if symbol == 'X':
+        return colored('X', 'yellow')
+    else:
+        return colored('O', 'cyan')
 
 
 def sign_selection():
@@ -9,8 +18,8 @@ def sign_selection():
     while True:
         user_input = int(input(
             f'Выберите игровую роль:\n'
-            f'1 - {colored("X", "yellow")}\n'
-            f'2 - {colored("O", "cyan")}\n'
+            f'1 - {change_color("X")}\n'
+            f'2 - {change_color("O")}\n'
             f'Ответ: '))
 
         if user_input == 1 or user_input == 2:
@@ -22,13 +31,13 @@ def sign_selection():
                 player, computer = 'O', 'X'
                 index = 1
 
-            print(f'Вы выбрали {player}, игра началась.\n')
+            print(f'Вы выбрали {change_color(player)}, игра началась.\n')
             time.sleep(1.5)
 
             gen_elements_field = {num: str(num) for num in range(1, 101)}
             gen_cells = [num for num in range(1, 101)]
             gen_names_symbols = [{'name': 'player', 'symbol': player},
-                              {'name': 'computer', 'symbol': computer}]
+                                 {'name': 'computer', 'symbol': computer}]
 
             return gen_elements_field, gen_cells, gen_names_symbols, index
 
@@ -42,18 +51,14 @@ def field_rendering(el_field):
         for col in range(10):
 
             if col == 0:
-                if el_field[i_elem] == 'X':
-                    print(f' {colored(el_field[i_elem], "yellow")}', end='\t')
-                elif el_field[i_elem] == 'O':
-                    print(f' {colored(el_field[i_elem], "cyan")}', end='\t')
+                if el_field[i_elem] == 'X' or el_field[i_elem] == 'O':
+                    print(f' {change_color(el_field[i_elem])}', end='\t')
                 else:
                     print(f' {el_field[i_elem]}', end='\t')
 
             else:
-                if el_field[i_elem] == 'X':
-                    print(f'|{colored(el_field[i_elem], "yellow")}', end='\t')
-                elif el_field[i_elem] == 'O':
-                    print(f'|{colored(el_field[i_elem], "cyan")}', end='\t')
+                if el_field[i_elem] == 'X' or el_field[i_elem] == 'O':
+                    print(f'|{change_color(el_field[i_elem])}', end='\t')
                 else:
                     print(f'|{el_field[i_elem]}', end='\t')
             i_elem += 1
@@ -64,17 +69,42 @@ def field_rendering(el_field):
             print('-' * 40)
 
 
+def info():
+    while True:
+        print("""
+        Обратные "Крестики-нолики":
+    
+        Игра имеет консольный интерфейс и разворачивается на поле размером 10 на 10 клеток.
+        В начале игры требуется выбрать символ "X" или "O". По правилам игры первый ход делает игрок выбравший символ "X".
+        Условие победы отличается от классической игры тем, что в данной версии для победы требуется избегать размещения 
+        последовательности из 5 символов (по вертикали, горизонтали и диагонали). В противном случае - игрок проигрывает.
+        В случае отсутствия свободных клеток - игрокам присваивается НИЧЬЯ.
+    
+        https://github.com/SrgSemenov/For-Y_lab
+        """)
+
+        if input('Для начала игры введите "старт": ').lower() == 'старт':
+            break
+
+
 def make_a_move(cell_data, el_field, symbol, player_name):
     """Функция определяет пуста ли ячейка в указанной позиции и ставит текущий символ игрока"""
 
     if player_name == 'player':
         while True:
-            step = int(input('\nВаш ход! \nВведите номер клетки: '))
-            if (step in range(1, 101)) and (step in cell_data):
-                cell_data.remove(step)
-                el_field[step] = symbol
-                break
-            print('Некорректный номер клетки или клетка уже занята.')
+            step = input('\nВаш ход! Для размещения символа на поле необжодимо ввести номер клетки.\n'
+                         'Номер клетки: ')
+            if step.isdigit() and (int(step) in range(1, 101)):
+                step = int(step)
+                if step in cell_data:
+                    cell_data.remove(step)
+                    el_field[step] = symbol
+                    break
+                else:
+                    print(f'Клетка под номером "{step}" занята. Выберите другую.')
+            else:
+                print(f'Вы ввели не корректный символ "{step}". Ожидается целое число от 1 до 100.')
+
     else:
         print('\nХод компьютера.')
         time.sleep(1.5)
@@ -94,35 +124,19 @@ def check(el_field, cells):
                 return 'Ничья'
 
             if (i_key % 10 < 7) and (i_key % 10 != 0) and (i_key // 10 < 6):
-                if (el_field[i_key] == symbol) \
-                        and (el_field[i_key + 11] == symbol) \
-                        and (el_field[i_key + 22] == symbol) \
-                        and (el_field[i_key + 33] == symbol) \
-                        and (el_field[i_key + 44] == symbol):
+                if all(x == symbol for x in [el_field[i_key + num] for num in range(0, 44+1, 11)]):
                     return change_elem(symbol)
 
             if (i_key % 10 > 4 and i_key // 10 < 6) or (i_key % 10 == 0 and i_key // 10 < 7):
-                if (el_field[i_key] == symbol) \
-                        and (el_field[i_key + 9] == symbol) \
-                        and (el_field[i_key + 18] == symbol) \
-                        and (el_field[i_key + 27] == symbol) \
-                        and (el_field[i_key + 36] == symbol):
+                if all(x == symbol for x in [el_field[i_key + num] for num in range(0, 36+1, 9)]):
                     return change_elem(symbol)
 
             if (i_key % 10 < 7) and (i_key % 10 != 0):
-                if (el_field[i_key] == symbol) \
-                        and (el_field[i_key + 1] == symbol) \
-                        and (el_field[i_key + 2] == symbol) \
-                        and (el_field[i_key + 3] == symbol) \
-                        and (el_field[i_key + 4] == symbol):
+                if all(x == symbol for x in [el_field[i_key + num] for num in range(0, 4+1, 1)]):
                     return change_elem(symbol)
 
             if i_key < 61:
-                if (el_field[i_key] == symbol) \
-                        and (el_field[i_key + 10] == symbol) \
-                        and (el_field[i_key + 20] == symbol) \
-                        and (el_field[i_key + 30] == symbol) \
-                        and (el_field[i_key + 40] == symbol):
+                if all(x == symbol for x in [el_field[i_key + num] for num in range(0, 40+1, 10)]):
                     return change_elem(symbol)
 
 
@@ -130,7 +144,8 @@ def restart_game():
     """Предложение игрокам начать игру заново"""
 
     while True:
-        user = input('\nВведите "да" для перезапуска игры или "нет" для завершения: ')
+        user = input('\nИгра окончена!'
+                     '\nВведите "да" для перезапуска игры или "нет" для завершения: ')
         if user.lower() == 'да' or user.lower() == 'нет':
             if user.lower() == 'да':
                 print('Перезапускаю игру.')
@@ -162,12 +177,14 @@ def clear_screen():
 
 
 if __name__ == '__main__':
-
+    info()
     elements_field, cells_lst, names_symbols, i = sign_selection()
     restart_flag = False
 
     while True:
         if restart_flag:
+            info()
+
             elements_field, cells_lst, names_symbols, i = sign_selection()
             flag = False
 
