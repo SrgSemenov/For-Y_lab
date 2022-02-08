@@ -16,13 +16,15 @@ def sign_selection():
     """Функция предоставляет игроку выбор символа"""
 
     while True:
-        user_input = int(input(
-            f'Выберите игровую роль:\n'
-            f'1 - {change_color("X")}\n'
-            f'2 - {change_color("O")}\n'
-            f'Ответ: '))
+        print(f'Выберите игровую роль:\n'
+              f'Введите 1 - для игры за {change_color("X")}\n'
+              f'Введите 2 - для игры за {change_color("O")}')
 
-        if user_input == 1 or user_input == 2:
+        user_input = input('Ваш выбор: ')
+
+        if user_input.isdigit() and (user_input == str(1) or user_input == str(2)):
+            user_input = int(user_input)
+
             if user_input == 1:
                 player, computer = 'X', 'O'
                 index = 0
@@ -40,6 +42,8 @@ def sign_selection():
                                  {'name': 'computer', 'symbol': computer}]
 
             return gen_elements_field, gen_cells, gen_names_symbols, index
+        else:
+            print('\nТребуется ввести 1 или 2.\n')
 
 
 def field_rendering(el_field):
@@ -84,7 +88,9 @@ def info():
         """)
 
         if input('Для начала игры введите "старт": ').lower() == 'старт':
+            clear_screen()
             break
+        clear_screen()
 
 
 def make_a_move(cell_data, el_field, symbol, player_name):
